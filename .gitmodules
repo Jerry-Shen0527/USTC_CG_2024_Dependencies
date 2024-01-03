@@ -1,0 +1,9 @@
+[submodule "OpenUSD"]
+	path = OpenUSD
+	url = https://github.com/PixarAnimationStudios/OpenUSD.git
+[submodule "tbb"]
+	path = tbb
+	url = https://github.com/wjakob/tbb.git
+[submodule "OpenSubdiv"]
+	path = OpenSubdiv
+	url = https://github.com/PixarAnimationStudios/OpenSubdiv.git
