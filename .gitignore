@@ -2,3 +2,4 @@ Binaries/
 build/
 installed_ext/
 SDK/
+.vscode/

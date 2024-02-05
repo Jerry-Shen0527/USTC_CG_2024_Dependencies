@@ -32,13 +32,13 @@ def build_lib(
 ):
     build_dir = get_build_dir(target, lib_name)
 
-    if not force_full_rebuild:
-        if os.path.exists(build_dir):
-            print("Build directory for {} already exist. Skipping.".format(lib_name))
-            return 1
-    else:
-        if os.path.exists(build_dir):
-            os.removedirs(build_dir)
+    # if not force_full_rebuild:
+    #     if os.path.exists(build_dir):
+    #         print("Build directory for {} already exist. Skipping.".format(lib_name))
+    #         return 1
+    # else:
+    #     if os.path.exists(build_dir):
+    #         os.removedirs(build_dir)
 
     os.makedirs(build_dir, exist_ok=True)
     install_dir = get_install_dir(target, lib_name)
@@ -179,16 +179,95 @@ def fix_USD_cmake_config(target):
     return
 
 
+def build_blosc(target):
+    lib_name = "c-blosc"
+    extra_command = []
+    already_built = build_lib(lib_name, extra_command, target) != 0
+    return already_built
+
+
+def build_zlib(target):
+    lib_name = "zlib"
+    extra_command = []
+    already_built = build_lib(lib_name, extra_command, target) != 0
+    return already_built
+
+
+def build_openexr(target):
+    lib_name = "openexr"
+    extra_command = [
+        "-DOPENEXR_INSTALL_TOOLS=OFF",
+        "-DOPENEXR_INSTALL_EXAMPLES=OFF",
+        # Force OpenEXR to build and use a separate Imath library
+        # instead of looking for one externally. This ensures that
+        # OpenEXR and other dependencies use the Imath library
+        # built via this script.
+        "-DOPENEXR_FORCE_INTERNAL_IMATH=ON",
+        "-DBUILD_TESTING=OFF",
+    ]
+    already_built = build_lib(lib_name, extra_command, target) != 0
+    return already_built
+
+
+def build_openvdb(target):
+    build_blosc(target)
+    build_zlib(target)
+
+    lib_name = "openvdb"
+    extra_command = []
+    tbb_install_dir = get_install_dir(target, "tbb")
+    zlib_install_dir = get_install_dir(target, "zlib")
+    blosc_install_dir = get_install_dir(target, "c-blosc")
+
+    extra_command.append("-DTBB_ROOT={}".format(tbb_install_dir))
+    extra_command.append("-DBLOSC_ROOT={}".format(blosc_install_dir))
+    extra_command.append("-DZLIB_ROOT={}".format(zlib_install_dir))
+    extra_command.append("-DOPENVDB_BUILD_NANOVDB=ON")
+    extra_command.append("-DOPENVDB_CORE_STATIC=OFF")
+    extra_command.append("-DUSE_EXPLICIT_INSTANTIATION=OFF")
+    extra_command.append("-DMSVC_COMPRESS_PDB=OFF")
+    extra_command.append("-DNANOVDB_USE_OPENVDB=ON")
+    extra_command.append("-DNANOVDB_USE_BLOSC=ON")
+    extra_command.append("-DDISABLE_DEPENDENCY_VERSION_CHECKS=ON")
+
+    # It seems that openvdb has problem detecting existing built binaries.
+    already_built = build_lib(lib_name, extra_command, target) != 0
+    return already_built
+
+
+def build_MaterialX(target):
+    lib_name = "MaterialX"
+    extra_command = ["-DMATERIALX_BUILD_SHARED_LIBS=ON",
+                        '-DMATERIALX_BUILD_TESTS=OFF']
+    already_built = build_lib(lib_name, extra_command, target) != 0
+    return already_built
+
+
 def build_OpenUSD(target):
+    build_openexr(target)
     lib_name = "OpenUSD"
     extra_command = []
     install_dir = get_install_dir(target, lib_name)
-    tbb_install_dir = get_install_dir(target, "tbb")
-    osd_install_dir = get_install_dir(target, "OpenSubdiv")
 
+    tbb_install_dir = get_install_dir(target, "tbb")
     extra_command.append("-DTBB_ROOT_DIR={}".format(tbb_install_dir))
+
+    osd_install_dir = get_install_dir(target, "OpenSubdiv")
     extra_command.append("-DOPENSUBDIV_ROOT_DIR={}".format(osd_install_dir))
     extra_command.append("-DOPENSUBDIV_USE_GPU=ON")
+
+    mtlx_install_dir = get_install_dir(target, "MaterialX") + "/lib/cmake/MaterialX/"
+    extra_command.append("-DMaterialX_DIR={}".format(mtlx_install_dir))
+    extra_command.append("-DPXR_ENABLE_MATERIALX_SUPPORT=ON")
+
+    openvdb_install_dir = get_install_dir(target, "openvdb")
+    extra_command.append("-DOPENVDB_LOCATION={}".format(openvdb_install_dir))
+    extra_command.append("-DPXR_ENABLE_OPENVDB_SUPPORT=ON")
+
+    openexr_install_dir = get_install_dir(target, "openexr")
+    extra_command.append("-DOPENEXR_LOCATION={}".format(openexr_install_dir))
+    # It doesn't need a support flag
+
     extra_command.append("-DPXR_BUILD_TESTS=OFF")
     extra_command.append("-DPXR_USE_DEBUG_PYTHON=OFF")
 
@@ -212,6 +291,8 @@ def build(target="Debug"):
 
     build_tbb(target)
     build_OpenSubdiv(target)
+    build_openvdb(target=target)
+    build_MaterialX(target=target)
     build_OpenUSD(target)
 
     return
