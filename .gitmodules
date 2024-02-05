@@ -7,3 +7,18 @@
 [submodule "OpenSubdiv"]
 	path = OpenSubdiv
 	url = https://github.com/PixarAnimationStudios/OpenSubdiv.git
+[submodule "openvdb"]
+	path = openvdb
+	url = https://github.com/AcademySoftwareFoundation/openvdb.git
+[submodule "c-blosc"]
+	path = c-blosc
+	url = https://github.com/Blosc/c-blosc.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git
+[submodule "MaterialX"]
+	path = MaterialX
+	url = https://github.com/AcademySoftwareFoundation/MaterialX.git
+[submodule "openexr"]
+	path = openexr
+	url = https://github.com/mitsuba-renderer/openexr
