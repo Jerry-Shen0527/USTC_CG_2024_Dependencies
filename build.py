@@ -193,25 +193,16 @@ def build_zlib(target):
     return already_built
 
 
-def build_openexr(target):
-    lib_name = "openexr"
-    extra_command = [
-        "-DOPENEXR_INSTALL_TOOLS=OFF",
-        "-DOPENEXR_INSTALL_EXAMPLES=OFF",
-        # Force OpenEXR to build and use a separate Imath library
-        # instead of looking for one externally. This ensures that
-        # OpenEXR and other dependencies use the Imath library
-        # built via this script.
-        "-DOPENEXR_FORCE_INTERNAL_IMATH=ON",
-        "-DBUILD_TESTING=OFF",
-    ]
+def build_imath(target):
+    lib_name = "Imath"
+    extra_command = []
+
     already_built = build_lib(lib_name, extra_command, target) != 0
     return already_built
 
 
 def build_openvdb(target):
     build_blosc(target)
-    build_zlib(target)
 
     lib_name = "openvdb"
     extra_command = []
@@ -244,7 +235,7 @@ def build_MaterialX(target):
 
 
 def build_OpenUSD(target):
-    build_openexr(target)
+    build_imath(target)
     lib_name = "OpenUSD"
     extra_command = []
     install_dir = get_install_dir(target, lib_name)
@@ -264,8 +255,8 @@ def build_OpenUSD(target):
     extra_command.append("-DOPENVDB_LOCATION={}".format(openvdb_install_dir))
     extra_command.append("-DPXR_ENABLE_OPENVDB_SUPPORT=ON")
 
-    openexr_install_dir = get_install_dir(target, "openexr")
-    extra_command.append("-DOPENEXR_LOCATION={}".format(openexr_install_dir))
+    imath_install_dir = get_install_dir(target, "Imath") + "/lib/cmake/Imath/"
+    extra_command.append("-DImath_DIR={}".format(imath_install_dir))
     # It doesn't need a support flag
 
     extra_command.append("-DPXR_BUILD_TESTS=OFF")
@@ -273,7 +264,6 @@ def build_OpenUSD(target):
 
     if not target == "Debug":
         extra_command.append("-DTBB_USE_DEBUG_BUILD=0")
-
 
     already_built = build_lib(lib_name, extra_command, target) != 0
 
@@ -291,6 +281,7 @@ def build(target="Debug"):
 
     build_tbb(target)
     build_OpenSubdiv(target)
+    build_zlib(target)
     build_openvdb(target=target)
     build_MaterialX(target=target)
     build_OpenUSD(target)
