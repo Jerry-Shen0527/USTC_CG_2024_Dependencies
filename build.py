@@ -154,6 +154,7 @@ def fix_USD_cmake_config(target):
     lib_name = "OpenUSD"
     tbb_install_dir = get_install_dir(target, "tbb")
     osd_install_dir = get_install_dir(target, "OpenSubdiv")
+    vdb_install_dir = get_install_dir(target, "openvdb")
     installed_dir = get_install_dir(target, lib_name)
     import sys
 
@@ -173,6 +174,7 @@ def fix_USD_cmake_config(target):
                     line.replace("C:/local/boost_1_83_0", "${_IMPORT_PREFIX}/../boost")
                     .replace(tbb_install_dir, "${_IMPORT_PREFIX}/../tbb")
                     .replace(osd_install_dir, "${_IMPORT_PREFIX}/../OpenSubdiv")
+                    .replace(vdb_install_dir, "${_IMPORT_PREFIX}/../openvdb")
                     .replace(python_location + "/include", "${Python3_INCLUDE_DIR}")
                 )
                 fout.write(replaced)
