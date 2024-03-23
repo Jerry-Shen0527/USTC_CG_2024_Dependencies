@@ -50,13 +50,11 @@ def build_lib(
     cmake_command = decorate_cmake_command(
         cmake_command, "-DCMAKE_INSTALL_PREFIX={}".format(install_dir)
     )
-    cmake_command = decorate_cmake_command(
-        cmake_command, "-DBUILD_SHARED_LIBS=ON")
+    cmake_command = decorate_cmake_command(cmake_command, "-DBUILD_SHARED_LIBS=ON")
     cmake_command = decorate_cmake_command(
         cmake_command, "-DCMAKE_BUILD_TYPE={}".format(target)
     )
-    cmake_command = decorate_cmake_command(
-        cmake_command, "-DMSVC_MP_THREAD_COUNT=10")
+    cmake_command = decorate_cmake_command(cmake_command, "-DMSVC_MP_THREAD_COUNT=10")
 
     for definition in extra_definitions:
         cmake_command = decorate_cmake_command(cmake_command, definition)
@@ -177,8 +175,7 @@ def fix_USD_cmake_config(target):
         with open(installed_dir + "/cmake/pxrTargets.cmake", "wt") as fout:
             for line in fin:
                 replaced = (
-                    line.replace("C:/local/boost_1_83_0",
-                                 "${_IMPORT_PREFIX}/../boost")
+                    line.replace("C:/local/boost_1_83_0", "${_IMPORT_PREFIX}/../boost")
                     .replace(tbb_install_dir, "${_IMPORT_PREFIX}/../tbb")
                     .replace(osd_install_dir, "${_IMPORT_PREFIX}/../OpenSubdiv")
                     .replace(vdb_install_dir, "${_IMPORT_PREFIX}/../openvdb")
@@ -237,8 +234,7 @@ def build_openvdb(target):
 
 def build_MaterialX(target):
     lib_name = "MaterialX"
-    extra_command = ["-DMATERIALX_BUILD_SHARED_LIBS=ON",
-                     '-DMATERIALX_BUILD_TESTS=OFF']
+    extra_command = ["-DMATERIALX_BUILD_SHARED_LIBS=ON", "-DMATERIALX_BUILD_TESTS=OFF"]
     already_built = build_lib(lib_name, extra_command, target) != 0
     return already_built
 
@@ -256,8 +252,7 @@ def build_OpenUSD(target):
     extra_command.append("-DOPENSUBDIV_ROOT_DIR={}".format(osd_install_dir))
     extra_command.append("-DOPENSUBDIV_USE_GPU=ON")
 
-    mtlx_install_dir = get_install_dir(
-        target, "MaterialX") + "/lib/cmake/MaterialX/"
+    mtlx_install_dir = get_install_dir(target, "MaterialX") + "/lib/cmake/MaterialX/"
     extra_command.append("-DMaterialX_DIR={}".format(mtlx_install_dir))
     extra_command.append("-DPXR_ENABLE_MATERIALX_SUPPORT=ON")
 
@@ -285,8 +280,7 @@ def build_OpenUSD(target):
 
 
 def build(target="Debug"):
-    print(
-        "Begin building USTC_CG_2024 Dependencies. Target {0}".format(target))
+    print("Begin building USTC_CG_2024 Dependencies. Target {0}".format(target))
     # os.makedirs("./Binaries", exist_ok=True)
     os.makedirs("./build", exist_ok=True)
 
@@ -301,12 +295,17 @@ def build(target="Debug"):
 
 
 def download_and_extract_zip(url: str, target_directory: str) -> None:
+    proxies = {
+        "https": "http://127.0.0.1:10900",
+    }
+
     try:
         # Download the ZIP file
-        response = requests.get(url)
+        response = requests.get(url, proxies=proxies)
         if response.status_code != 200:
             print(
-                f"Error downloading ZIP file from {url}. Status code: {response.status_code}")
+                f"Error downloading ZIP file from {url}. Status code: {response.status_code}"
+            )
             return
 
         # Create a temporary file to store the downloaded content
@@ -314,7 +313,7 @@ def download_and_extract_zip(url: str, target_directory: str) -> None:
             tmp_file.write(response.content)
 
             # Extract the ZIP contents to the target directory
-            with zipfile.ZipFile(tmp_file, mode='r') as zip_file:
+            with zipfile.ZipFile(tmp_file, mode="r") as zip_file:
                 zip_file.extractall(target_directory)
                 print(f"ZIP contents extracted to {target_directory}")
 
@@ -328,11 +327,10 @@ if __name__ == "__main__":
 
     download_and_extract_zip(
         "https://github.com/embree/embree/releases/download/v4.3.1/embree-4.3.1.x64.windows.zip",
-        "SDK/common/embree")
-    
+        "SDK/common/embree",
+    )
+
     download_and_extract_zip(
         "https://github.com/shader-slang/slang/releases/download/v2024.0.11/slang-2024.0.11-win64.zip",
-        "SDK/common/slang")
-    
-    
-    
+        "SDK/common/slang",
+    )
