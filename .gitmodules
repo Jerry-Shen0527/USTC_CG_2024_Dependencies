@@ -1,6 +1,6 @@
 [submodule "OpenUSD"]
 	path = OpenUSD
-	url = https://github.com/PixarAnimationStudios/OpenUSD.git
+	url = https://github.com/Jerry-Shen0527/OpenUSD.git
 [submodule "tbb"]
 	path = tbb
 	url = https://github.com/wjakob/tbb.git
