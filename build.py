@@ -251,6 +251,7 @@ def build_OpenUSD(target):
     osd_install_dir = get_install_dir(target, "OpenSubdiv")
     extra_command.append("-DOPENSUBDIV_ROOT_DIR={}".format(osd_install_dir))
     extra_command.append("-DOPENSUBDIV_USE_GPU=ON")
+    extra_command.append("-DPYSIDE_USE_PYSIDE2=1")
 
     mtlx_install_dir = get_install_dir(target, "MaterialX") + "/lib/cmake/MaterialX/"
     extra_command.append("-DMaterialX_DIR={}".format(mtlx_install_dir))
@@ -295,13 +296,9 @@ def build(target="Debug"):
 
 
 def download_and_extract_zip(url: str, target_directory: str) -> None:
-    proxies = {
-        "https": "http://127.0.0.1:10900",
-    }
-
     try:
         # Download the ZIP file
-        response = requests.get(url, proxies=proxies)
+        response = requests.get(url)
         if response.status_code != 200:
             print(
                 f"Error downloading ZIP file from {url}. Status code: {response.status_code}"
@@ -322,8 +319,8 @@ def download_and_extract_zip(url: str, target_directory: str) -> None:
 
 
 if __name__ == "__main__":
-    build("Release")
-    build("Debug")
+    # build("Release")
+    # build("Debug")
 
     download_and_extract_zip(
         "https://github.com/embree/embree/releases/download/v4.3.1/embree-4.3.1.x64.windows.zip",
@@ -333,4 +330,8 @@ if __name__ == "__main__":
     download_and_extract_zip(
         "https://github.com/shader-slang/slang/releases/download/v2024.0.11/slang-2024.0.11-win64.zip",
         "SDK/common/slang",
+    )
+    download_and_extract_zip(
+        "https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2407/dxc_2024_07_31.zip",
+        "SDK/common/dxc",
     )
